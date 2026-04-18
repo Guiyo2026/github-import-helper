@@ -118,14 +118,24 @@ serve(async (req) => {
     const data = await response.json();
     console.log("AI response structure:", JSON.stringify(data).substring(0, 500));
 
-    const choice = data.choices?.[0]?.message;
-    const imageUrl = choice?.images?.[0]?.image_url?.url
-      || choice?.content?.find?.((p: any) => p.type === "image_url")?.image_url?.url
-      || (typeof choice?.content === "string" ? null : choice?.content?.find?.((p: any) => p.type === "image")?.data);
+    const choice = data.choices?.[0];
+    const message = choice?.message;
+    const finishReason = choice?.native_finish_reason || choice?.finish_reason;
+
+    const imageUrl = message?.images?.[0]?.image_url?.url
+      || message?.content?.find?.((p: any) => p.type === "image_url")?.image_url?.url
+      || (typeof message?.content === "string" ? null : message?.content?.find?.((p: any) => p.type === "image")?.data);
 
     if (!imageUrl) {
       console.error("Full response:", JSON.stringify(data));
-      throw new Error("No image in response");
+      const blocked = typeof finishReason === "string" && /PROHIBITED|SAFETY|BLOCK/i.test(finishReason);
+      const errorMsg = blocked
+        ? "El modelo bloqueó esta escena por seguridad. Prueba con una descripción diferente o más general."
+        : "No se pudo generar la imagen. Intenta de nuevo con otra descripción.";
+      return new Response(JSON.stringify({ error: errorMsg }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const { bytes, contentType } = await getImageUploadPayload(imageUrl);
