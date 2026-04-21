@@ -55,7 +55,7 @@ export function VoiceInput({ onResult }: VoiceInputProps) {
     };
   }, [stopListening]);
 
-  const toggle = () => {
+  const toggle = async () => {
     const SpeechRecognition = ((window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
 
@@ -66,6 +66,26 @@ export function VoiceInput({ onResult }: VoiceInputProps) {
 
     if (listening && recognitionRef.current) {
       stopListening();
+      return;
+    }
+
+    // Proactively request microphone permission so the browser shows the prompt.
+    try {
+      if (navigator.mediaDevices?.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Immediately release the mic; SpeechRecognition will reopen it.
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    } catch (err: any) {
+      if (err?.name === "NotAllowedError") {
+        toast.error("Permiso denegado. Habilita el micrófono en los ajustes del navegador.");
+      } else if (err?.name === "NotFoundError") {
+        toast.error("No se detectó ningún micrófono.");
+      } else if (err?.name === "NotReadableError") {
+        toast.error("El micrófono está siendo usado por otra aplicación.");
+      } else {
+        toast.error("No se pudo acceder al micrófono.");
+      }
       return;
     }
 
@@ -160,7 +180,7 @@ export function VoiceInput({ onResult }: VoiceInputProps) {
           : "border-red-400 text-red-500 hover:bg-red-50 hover:text-red-600"
       }
     >
-      {listening ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+      {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
     </Button>
   );
 }

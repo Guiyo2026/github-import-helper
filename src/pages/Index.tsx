@@ -9,10 +9,10 @@ import { VoiceInput } from "@/components/VoiceInput";
 import { supabase } from "@/integrations/supabase/client";
 import {
   buildExerciseShareText,
-  buildTelegramShareUrl,
-  buildWhatsAppShareUrl,
   getDirectShareUrl,
   openEmailShareDraft,
+  openTelegramShare,
+  openWhatsAppShare,
   shareExerciseNatively,
 } from "@/lib/exercise-share";
 import { toast } from "sonner";
@@ -185,17 +185,18 @@ export default function Index() {
   };
 
   const handleWhatsAppShare = async (includeQuestions: boolean) => {
+    // Open the window synchronously to avoid popup blockers, then update its URL after async work.
+    const popup = window.open("about:blank", "_blank", "noopener,noreferrer");
     const publicImageUrl = await ensureShareableImageUrl();
     const text = buildShareText(includeQuestions, publicImageUrl);
-    const url = buildWhatsAppShareUrl(text);
-    window.open(url, "_blank", "noopener,noreferrer");
+    openWhatsAppShare(text, popup);
   };
 
   const handleTelegramShare = async (includeQuestions: boolean) => {
+    const popup = window.open("about:blank", "_blank", "noopener,noreferrer");
     const publicImageUrl = await ensureShareableImageUrl();
     const text = buildShareText(includeQuestions, publicImageUrl);
-    const telegramUrl = buildTelegramShareUrl(text, publicImageUrl);
-    window.open(telegramUrl, "_blank", "noopener,noreferrer");
+    openTelegramShare(text, publicImageUrl, popup);
   };
 
   const handleEmailShare = async (includeQuestions: boolean) => {
