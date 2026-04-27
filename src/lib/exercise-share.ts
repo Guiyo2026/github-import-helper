@@ -57,13 +57,7 @@ export function buildExerciseShareText({
 
 export function buildWhatsAppShareUrl(text: string) {
   const encodedText = encodeURIComponent(text);
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-  if (isMobile) {
-    return `whatsapp://send?text=${encodedText}`;
-  }
-
-  return `https://web.whatsapp.com/send?text=${encodedText}`;
+  return `whatsapp://send?text=${encodedText}`;
 }
 
 export function buildTelegramShareUrl(text: string, imageUrl: string | null) {
