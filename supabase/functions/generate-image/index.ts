@@ -140,23 +140,39 @@ serve(async (req) => {
 
     const { bytes, contentType } = await getImageUploadPayload(imageUrl);
     const filePath = `generated/${crypto.randomUUID()}.${getFileExtension(contentType)}`;
-    const { error: uploadError } = await supabase.storage
-      .from("shared-exercises")
-      .upload(filePath, bytes, {
-        cacheControl: "3600",
-        contentType,
-        upsert: false,
+
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from("shared-exercises")
+        .upload(filePath, bytes, {
+          cacheControl: "3600",
+          contentType,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw new Error(uploadError.message);
+      }
+
+      const { data: publicImage } = supabase.storage.from("shared-exercises").getPublicUrl(filePath);
+      return new Response(JSON.stringify({ imageUrl: publicImage.publicUrl }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-
-    if (uploadError) {
-      throw new Error(uploadError.message);
+    } catch (uploadErr) {
+      console.error("Storage upload failed, returning data URL fallback:", uploadErr);
+      // Fallback: return the image as a data URL so the user still sees the result
+      let base64: string;
+      if (imageUrl.startsWith("data:")) {
+        base64 = imageUrl;
+      } else {
+        let binary = "";
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        base64 = `data:${contentType};base64,${btoa(binary)}`;
+      }
+      return new Response(JSON.stringify({ imageUrl: base64 }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
-
-    const { data: publicImage } = supabase.storage.from("shared-exercises").getPublicUrl(filePath);
-
-    return new Response(JSON.stringify({ imageUrl: publicImage.publicUrl }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
   } catch (e) {
     console.error("generate-image error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
