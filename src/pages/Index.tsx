@@ -185,18 +185,13 @@ export default function Index() {
   };
 
   const handleWhatsAppShare = async (includeQuestions: boolean) => {
-    // Open the window synchronously to avoid popup blockers, then update its URL after async work.
-    const popup = window.open("about:blank", "_blank", "noopener,noreferrer");
-    const publicImageUrl = await ensureShareableImageUrl();
-    const text = buildShareText(includeQuestions, publicImageUrl);
-    openWhatsAppShare(text, popup);
+    const text = buildShareText(includeQuestions);
+    openWhatsAppShare(text);
   };
 
   const handleTelegramShare = async (includeQuestions: boolean) => {
-    const popup = window.open("about:blank", "_blank", "noopener,noreferrer");
-    const publicImageUrl = await ensureShareableImageUrl();
-    const text = buildShareText(includeQuestions, publicImageUrl);
-    openTelegramShare(text, publicImageUrl, popup);
+    const text = buildShareText(includeQuestions);
+    openTelegramShare(text, shareableImageUrl ?? imageUrl);
   };
 
   const handleEmailShare = async (includeQuestions: boolean) => {
