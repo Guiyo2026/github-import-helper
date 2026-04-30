@@ -77,6 +77,7 @@ serve(async (req) => {
       gavarni: "Paul Gavarni illustration style, elegant 19th century French lithograph, fine ink crosshatching, sepia tones, Parisian caricature, delicate expressive figures, vintage engraving aesthetic",
       lego: "Lego minifigure style, everything made of Lego bricks, blocky plastic characters, bright primary colors, toy-like 3D render, playful and cheerful",
       muppets: "Jim Henson Muppets style, felt puppet characters, googly eyes, fuzzy textures, bright colorful fabric, whimsical and humorous, puppet show aesthetic",
+      corporate: "corporate portrait photography style, modern tech branding aesthetic, clean studio lighting, sharp professional headshot look, neutral minimalist background, soft gradients in blue and gray tones, polished editorial composition, LinkedIn-style professional imagery, sleek and contemporary",
     };
 
     const prompt = `Create an image of: ${scene || "a simple everyday scene"}. Style: ${stylePrompts[style] || stylePrompts.realistic}. The image should be suitable for English language learning exercises. No text or words in the image.`;
