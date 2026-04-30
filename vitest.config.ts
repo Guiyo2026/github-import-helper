@@ -1,9 +1,8 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-// línea 4: import defineConfig...
-export default defineConfig({
-  base: '/github-import-helper/',
+
+export default defineConfig({  
   plugins: [react()],
   test: {
     environment: "jsdom",
