@@ -55,7 +55,7 @@ export function VoiceInput({ onResult }: VoiceInputProps) {
     };
   }, [stopListening]);
 
-  const toggle = async () => {
+  const toggle = () => {
     const SpeechRecognition = ((window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined;
 
@@ -66,26 +66,6 @@ export function VoiceInput({ onResult }: VoiceInputProps) {
 
     if (listening && recognitionRef.current) {
       stopListening();
-      return;
-    }
-
-    // Proactively request microphone permission so the browser shows the prompt.
-    try {
-      if (navigator.mediaDevices?.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Immediately release the mic; SpeechRecognition will reopen it.
-        stream.getTracks().forEach((track) => track.stop());
-      }
-    } catch (err: any) {
-      if (err?.name === "NotAllowedError") {
-        toast.error("Permiso denegado. Habilita el micrófono en los ajustes del navegador.");
-      } else if (err?.name === "NotFoundError") {
-        toast.error("No se detectó ningún micrófono.");
-      } else if (err?.name === "NotReadableError") {
-        toast.error("El micrófono está siendo usado por otra aplicación.");
-      } else {
-        toast.error("No se pudo acceder al micrófono.");
-      }
       return;
     }
 
@@ -128,15 +108,20 @@ export function VoiceInput({ onResult }: VoiceInputProps) {
       };
 
       recognition.onerror = (event) => {
-        if (event.error === "not-allowed") {
-          toast.error("Allow microphone access to use voice input");
+        const err = event.error;
+        if (err === "not-allowed" || err === "service-not-allowed") {
+          toast.error("Permiso denegado. Habilita el micrófono en los ajustes del navegador.");
           stopListening("abort");
-        } else if (event.error === "audio-capture") {
-          toast.error("No microphone was detected");
+        } else if (err === "audio-capture") {
+          toast.error("No se detectó ningún micrófono.");
           stopListening("abort");
-        } else if (event.error && event.error !== "aborted" && event.error !== "no-speech") {
-          toast.error("Voice input stopped unexpectedly. Try again.");
+        } else if (err === "network") {
+          toast.error("Error de red en el reconocimiento de voz. Verifica tu conexión.");
           stopListening("abort");
+        } else if (err === "no-speech") {
+          // ignore — onend will restart automatically
+        } else if (err && err !== "aborted") {
+          console.warn("Speech recognition error:", err);
         }
       };
 
