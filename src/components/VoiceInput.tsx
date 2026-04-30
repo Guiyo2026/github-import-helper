@@ -27,6 +27,7 @@ export function VoiceInput({ onResult }: VoiceInputProps) {
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const shouldKeepListeningRef = useRef(false);
   const transcriptRef = useRef("");
+  const networkRetryRef = useRef(0);
 
   const stopListening = useCallback((mode: "stop" | "abort" = "stop") => {
     shouldKeepListeningRef.current = false;
@@ -116,7 +117,22 @@ export function VoiceInput({ onResult }: VoiceInputProps) {
           toast.error("No se detectó ningún micrófono.");
           stopListening("abort");
         } else if (err === "network") {
-          toast.error("Error de red en el reconocimiento de voz. Verifica tu conexión.");
+          // El reconocimiento de voz del navegador requiere conectarse a los
+          // servidores de Google. Reintentamos una vez antes de rendirnos.
+          if (networkRetryRef.current < 1 && navigator.onLine) {
+            networkRetryRef.current += 1;
+            // onend se encargará de reiniciar automáticamente
+            return;
+          }
+          networkRetryRef.current = 0;
+          if (!navigator.onLine) {
+            toast.error("Sin conexión a internet. El dictado por voz necesita estar online.");
+          } else {
+            toast.error(
+              "El dictado por voz no está disponible. Usa Chrome/Edge en escritorio y desactiva VPN, AdBlock o restricciones de red.",
+              { duration: 6000 },
+            );
+          }
           stopListening("abort");
         } else if (err === "no-speech") {
           // ignore — onend will restart automatically
