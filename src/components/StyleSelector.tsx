@@ -14,6 +14,7 @@ const styles = [
   { id: "gavarni", label: "Gavarni", emoji: "🎩", color: "from-stone-400 to-amber-700" },
   { id: "lego", label: "Lego", emoji: "🧱", color: "from-red-400 to-yellow-400" },
   { id: "muppets", label: "Muppets", emoji: "🐸", color: "from-green-400 to-emerald-500" },
+  { id: "corporate", label: "Corporate Portrait", emoji: "💼", color: "from-indigo-500 to-blue-700" },
 ] as const;
 
 export type ImageStyle = (typeof styles)[number]["id"];
