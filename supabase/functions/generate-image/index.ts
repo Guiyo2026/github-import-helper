@@ -79,6 +79,7 @@ serve(async (req) => {
       muppets: "Jim Henson Muppets style, felt puppet characters, googly eyes, fuzzy textures, bright colorful fabric, whimsical and humorous, puppet show aesthetic",
       corporate: "corporate portrait photography style, modern tech branding aesthetic, clean studio lighting, sharp professional headshot look, neutral minimalist background, soft gradients in blue and gray tones, polished editorial composition, LinkedIn-style professional imagery, sleek and contemporary",
       "corporate-cartoon": "semi-cartoon corporate portrait style, stylized 3D illustration with realistic proportions, modern tech branding aesthetic, clean studio lighting, smooth shading, soft gradients in blue and gray tones, neutral minimalist background, polished editorial composition, friendly approachable characters, blend of Pixar-like rendering and professional LinkedIn headshot, contemporary corporate illustration",
+      watercolor: "digital illustration in watercolor style, soft flowing washes of color, visible paper texture, delicate pigment bleeds and gradients, hand-painted aesthetic, gentle brush strokes, light pastel palette with vibrant accents, artistic and dreamy atmosphere, traditional watercolor painting look",
     };
 
     const prompt = `Create an image of: ${scene || "a simple everyday scene"}. Style: ${stylePrompts[style] || stylePrompts.realistic}. The image should be suitable for English language learning exercises. No text or words in the image.`;
